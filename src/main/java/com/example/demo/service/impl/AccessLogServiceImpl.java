@@ -10,6 +10,10 @@ public class AccessLogServiceImpl implements AccessLogService {
     
     AccessLogRepository accessLogRepository;
 
+    public AccessLogServiceImpl(AccessLogRepository accessLogRepository) {
+        this.accessLogRepository = accessLogRepository;
+    }
+
     @Override
     public AccessLog createLog(AccessLog log){
         return null;

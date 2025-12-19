@@ -9,6 +9,10 @@ import com.example.demo.service.KeyShareRequestService;
 public class KeyShareRequestServiceImpl implements KeyShareRequestService {
     KeyShareRequestRepository keyShareRequestRepository;
 
+    public KeyShareRequestServiceImpl(KeyShareRequestRepository keyShareRequestRepository) {
+        this.keyShareRequestRepository = keyShareRequestRepository;
+    }
+
     @Override
     public KeyShareRequest createShareRequest(KeyShareRequest request){
         return null;

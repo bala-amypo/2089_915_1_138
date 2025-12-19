@@ -10,6 +10,10 @@ public class DigitalKeyServiceImpl implements DigitalKeyService {
     
     DigitalKeyRepository digitalKeyRepository;
 
+    public DigitalKeyServiceImpl(DigitalKeyRepository digitalKeyRepository) {
+        this.digitalKeyRepository = digitalKeyRepository;
+    }
+
     @Override
     public DigitalKey generateKey(Long bookingId){
         return null;

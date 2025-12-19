@@ -10,6 +10,10 @@ public class RoomBookingServiceImpl implements RoomBookingService{
     
     RoomBookingRepository roomBookingRepository;
 
+    public RoomBookingServiceImpl(RoomBookingRepository roomBookingRepository) {
+        this.roomBookingRepository = roomBookingRepository;
+    }
+
     @Override
     public RoomBooking createBooking(RoomBooking booking){
         return null;

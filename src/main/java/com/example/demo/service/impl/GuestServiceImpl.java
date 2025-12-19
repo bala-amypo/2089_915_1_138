@@ -9,6 +9,10 @@ import com.example.demo.service.GuestService;
 public class GuestServiceImpl implements GuestService {
     GuestRepository guestRepo;
 
+    public GuestServiceImpl(GuestRepository guestRepo) {
+        this.guestRepo = guestRepo;
+    }
+
     @Override
     public Guest createGuest(Guest guest){
         return null;
