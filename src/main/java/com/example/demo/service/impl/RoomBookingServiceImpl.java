@@ -2,26 +2,36 @@ package com.example.demo.service.impl;
 
 import java.util.List;
 
-import com.example.demo.model.AccessLog;
-import com.example.demo.repository.AccessLogRepository;
-import com.example.demo.service.AccessLogService;
+import com.example.demo.model.RoomBooking;
+import com.example.demo.repository.RoomBookingRepository;
+import com.example.demo.service.RoomBookingService;
 
-public class AccessLogServiceImpl implements AccessLogService {
+public class RoomBookingServiceImpl implements RoomBookingService{
     
-    AccessLogRepository accessLogRepository;
+    RoomBookingRepository roomBookingRepository;
 
     @Override
-    public AccessLog createLog(AccessLog log){
+    public RoomBooking createBooking(RoomBooking booking){
         return null;
     }
 
     @Override
-    public List<AccessLog> getLogsForKey(Long keyId){
+    public RoomBooking updateBooking(Long id,RoomBooking booking){
         return null;
     }
 
     @Override
-    public List<AccessLog> getLogsForGuest(Long guestId){
+    public RoomBooking getBookingById(Long id){
         return null;
+    }
+
+    @Override
+    public List<RoomBooking> getBookingsForGuest(Long guestId){
+        return null;
+    }
+
+    @Override
+    public void cancelBooking(Long id){
+        
     }
 }
