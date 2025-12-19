@@ -39,7 +39,7 @@ public class KeyShareRequest {
     public void setDigitalKey(DigitalKey digitalKey) {
         this.digitalKey = digitalKey;
     }
-    public void setsharedBy(Guest sharedBy) {
+    public void setSharedBy(Guest sharedBy) {
         this.sharedBy = sharedBy;
     }
     public void setSharedWith(Guest sharedWith) {
@@ -63,7 +63,7 @@ public class KeyShareRequest {
     public DigitalKey getDigitalKey() {
         return digitalKey;
     }
-    public Guest getsharedBy() {
+    public Guest getSharedBy() {
         return sharedBy;
     }
     public Guest getSharedWith() {
