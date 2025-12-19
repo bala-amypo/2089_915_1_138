@@ -37,7 +37,7 @@ public class GuestServiceImpl implements GuestService {
     }
 
     @Override
-    public List<Guest> getAllGuest(){
+    public List<Guest> getAllGuests(){
         return null;
     }
 
