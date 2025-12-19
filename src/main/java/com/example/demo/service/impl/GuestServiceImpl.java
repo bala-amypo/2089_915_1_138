@@ -2,15 +2,23 @@ package com.example.demo.service.impl;
 
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.example.demo.model.Guest;
 import com.example.demo.repository.GuestRepository;
 import com.example.demo.service.GuestService;
 
+@Service
 public class GuestServiceImpl implements GuestService {
-    GuestRepository guestRepo;
 
-    public GuestServiceImpl(GuestRepository guestRepo) {
-        this.guestRepo = guestRepo;
+    GuestRepository guestRepository;
+    PasswordEncoder passwordEncoder;
+
+    public GuestServiceImpl(GuestRepository guestRepository,
+                            PasswordEncoder passwordEncoder) {
+        this.guestRepository = guestRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
