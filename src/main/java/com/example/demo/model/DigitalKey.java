@@ -72,6 +72,10 @@ public class DigitalKey {
         this.expiresAt = expiresAt;
         this.active = active;
     }
+    
     public DigitalKey(RoomBooking booking2, String string, Timestamp issuedAt2, Timestamp expiresAt2, boolean b) {
+    }
+
+    public DigitalKey(){
     }
 }
