@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -60,7 +61,7 @@ public class AuthController {
 
         String token = jwtTokenProvider.generateToken(authentication);
 
-        Guest guest = guestService.getGuestByEmail(request.getEmail());
+        Optional<Guest> guest = guestService.getGuestByEmail(request.getEmail());
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
