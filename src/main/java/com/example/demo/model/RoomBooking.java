@@ -90,8 +90,5 @@ public class RoomBooking {
         this.checkOutDate = checkOutDate;
         this.active = active;
         this.roommates = roommates;
-    }
-    
-
-    
+    }   
 }
