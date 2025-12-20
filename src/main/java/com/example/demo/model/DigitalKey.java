@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 
 import jakarta.persistence.Entity;
@@ -71,6 +72,6 @@ public class DigitalKey {
         this.expiresAt = expiresAt;
         this.active = active;
     }
-    public DigitalKey() {
+    public DigitalKey(RoomBooking booking2, String string, Timestamp issuedAt2, Timestamp expiresAt2, boolean b) {
     }
 }
