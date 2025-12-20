@@ -1,6 +1,7 @@
 package com.example.demo.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -64,7 +65,7 @@ public class GuestServiceImpl implements GuestService {
     }
 
     @Override
-    public java.util.Optional<Guest> getGuestByEmail(String email) {
+    public Optional<Guest> getGuestByEmail(String email) {
         return guestRepository.findByEmail(email);
     }
 }
