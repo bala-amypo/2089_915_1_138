@@ -1,46 +1,56 @@
-package com.example.demo.controller;
+package com.example.demo.service.impl;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Guest;
+import com.example.demo.repository.GuestRepository;
 import com.example.demo.service.GuestService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+@Service
+public class GuestServiceImpl implements GuestService {
 
-@RestController
-@RequestMapping("/api/guests")
-public class GuestController {
-    GuestService guestService;
+    GuestRepository guestRepository;
+    PasswordEncoder passwordEncoder;
 
-     @PostMapping
-    public Guest create(@RequestBody Guest guest) {
-        return guestService.createGuest(guest);
+    public GuestServiceImpl(GuestRepository guestRepository,
+                            PasswordEncoder passwordEncoder) {
+        this.guestRepository = guestRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping("/{id}")
-    public Guest getById(@PathVariable Long id) {
-        return guestService.getGuestById(id);
+    @Override
+    public Guest createGuest(Guest guest){
+        return null;
     }
 
-    @GetMapping
-    public List<Guest> getAll() {
-        return guestService.getAllGuests();
+    @Override
+    public Guest updateGuest(Long id,Guest guest){
+        return null;
     }
 
-    @PutMapping("/{id}")
-    public Guest update(@PathVariable Long id, @RequestBody Guest guest) {
-        return guestService.updateGuest(id, guest);
+    @Override
+    public Guest getGuestById(Long id){
+        return null;
     }
 
-    @PutMapping("/{id}/deactivate")
-    public void deactivate(@PathVariable Long id) {
-        guestService.deactivateGuest(id);
+    @Override
+    public List<Guest> getAllGuests(){
+        return null;
+    }
+
+    @Override
+    public void deactivateGuest(Long id){
+        Guest guest = getGuestById(id);
+        guest.setActive(false);
+        guestRepository.save(guest);
+    }
+
+    @Override
+    public Guest getGuestByEmail(String email) {
+        return guestRepository.findByEmail(email);
     }
 }
+
