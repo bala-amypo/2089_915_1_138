@@ -41,7 +41,7 @@ public class Guest {
     public void setVerified(boolean verified) {
         this.verified = verified;
     }
-    public void setActive(Boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
     public void setRole(String role) {
@@ -68,7 +68,7 @@ public class Guest {
     public boolean isVerified() {
         return verified;
     }
-    public Boolean getActive() {
+    public boolean getActive() {
         return active;
     }
     public String getRole() {
