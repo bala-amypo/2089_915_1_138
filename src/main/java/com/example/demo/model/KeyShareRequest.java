@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
-import java.sql.Timestamp;
+import java.time.Instant;
+
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,10 +30,10 @@ public class KeyShareRequest {
     @JoinColumn(name = "shared_with_id")
     private Guest sharedWith;
 
-    private Timestamp shareStart;
-    private Timestamp shareEnd;
+    private Instant shareStart;
+    private Instant shareEnd;
     private String status;
-    private Timestamp createdAt;
+    private Instant createdAt;
     public void setId(Long id) {
         this.id = id;
     }
@@ -45,16 +46,16 @@ public class KeyShareRequest {
     public void setSharedWith(Guest sharedWith) {
         this.sharedWith = sharedWith;
     }
-    public void setShareStart(Timestamp shareStart) {
+    public void setShareStart(Instant shareStart) {
         this.shareStart = shareStart;
     }
-    public void setShareEnd(Timestamp shareEnd) {
+    public void setShareEnd(Instant shareEnd) {
         this.shareEnd = shareEnd;
     }
     public void setStatus(String status) {
         this.status = status;
     }
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
     public Long getId() {
@@ -69,20 +70,20 @@ public class KeyShareRequest {
     public Guest getSharedWith() {
         return sharedWith;
     }
-    public Timestamp getShareStart() {
+    public Instant getShareStart() {
         return shareStart;
     }
-    public Timestamp getShareEnd() {
+    public Instant getShareEnd() {
         return shareEnd;
     }
     public String getStatus() {
         return status;
     }
-    public Timestamp getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
-    public KeyShareRequest(Long id, DigitalKey digitalKey, Guest sharedBy, Guest sharedWith, Timestamp shareStart,
-            Timestamp shareEnd, String status, Timestamp createdAt) {
+    public KeyShareRequest(Long id, DigitalKey digitalKey, Guest sharedBy, Guest sharedWith, Instant shareStart,
+            Instant shareEnd, String status, Instant createdAt) {
         this.id = id;
         this.digitalKey = digitalKey;
         this.sharedBy = sharedBy;

@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
-import java.sql.Timestamp;
+import java.time.Instant;
+
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,7 +22,7 @@ public class Guest {
     private boolean verified = false;
     private boolean active = true;
     private String role = "ROLE_USER";
-    private Timestamp createdAt;
+    private Instant createdAt;
     public void setId(Long id) {
         this.id = id;
     }
@@ -46,7 +47,7 @@ public class Guest {
     public void setRole(String role) {
         this.role = role;
     }
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
     public Long getId() {
@@ -73,13 +74,13 @@ public class Guest {
     public String getRole() {
         return role;
     }
-    public Timestamp getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
     public Guest() {
     }
     public Guest(Long id, String fullName, String email, String phoneNumber, String password, boolean verified,
-            boolean active, String role, Timestamp createdAt) {
+            boolean active, String role, Instant createdAt) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;

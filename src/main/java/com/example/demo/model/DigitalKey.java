@@ -1,6 +1,6 @@
 package com.example.demo.model;
 
-import java.sql.Timestamp;
+import java.time.Instant;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,8 +21,8 @@ public class DigitalKey {
     @JoinColumn(name = "booking_id")
     private RoomBooking booking;
     private String keyValue;
-    private Timestamp issuedAt;
-    private Timestamp expiresAt;
+    private Instant issuedAt;
+    private Instant expiresAt;
     private boolean active;
 
     
@@ -35,10 +35,10 @@ public class DigitalKey {
     public void setKeyValue(String keyValue) {
         this.keyValue = keyValue;
     }
-    public void setIssuedAt(Timestamp issuedAt) {
+    public void setIssuedAt(Instant issuedAt) {
         this.issuedAt = issuedAt;
     }
-    public void setExpiresAt(Timestamp expiresAt) {
+    public void setExpiresAt(Instant expiresAt) {
         this.expiresAt = expiresAt;
     }
     public void setActive(boolean active) {
@@ -53,16 +53,16 @@ public class DigitalKey {
     public String getKeyValue() {
         return keyValue;
     }
-    public Timestamp getIssuedAt() {
+    public Instant getIssuedAt() {
         return issuedAt;
     }
-    public Timestamp getExpiresAt() {
+    public Instant getExpiresAt() {
         return expiresAt;
     }
     public boolean isActive() {
         return active;
     }
-    public DigitalKey(Long id, RoomBooking booking, String keyValue, Timestamp issuedAt, Timestamp expiresAt,
+    public DigitalKey(Long id, RoomBooking booking, String keyValue, Instant issuedAt, Instant expiresAt,
             boolean active) {
         this.id = id;
         this.booking = booking;

@@ -1,6 +1,6 @@
 package com.example.demo.model;
 
-import java.sql.Timestamp;
+import java.time.Instant;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,8 +24,7 @@ public class AccessLog {
     @ManyToOne
     @JoinColumn(name ="guest_id")
     private Guest guest;
-
-    private Timestamp accessTime;
+    private Instant accessTime;
     private String result;
     private String reason;
     public void setId(Long id) {
@@ -37,7 +36,7 @@ public class AccessLog {
     public void setGuest(Guest guest) {
         this.guest = guest;
     }
-    public void setAccessTime(Timestamp accessTime) {
+    public void setAccessTime(Instant accessTime) {
         this.accessTime = accessTime;
     }
     public void setResult(String result) {
@@ -55,7 +54,7 @@ public class AccessLog {
     public Guest getGuest() {
         return guest;
     }
-    public Timestamp getAccessTime() {
+    public Instant getAccessTime() {
         return accessTime;
     }
     public String getResult() {
@@ -64,7 +63,7 @@ public class AccessLog {
     public String getReason() {
         return reason;
     }
-    public AccessLog(Long id, DigitalKey digitalKey, Guest guest, Timestamp accessTime, String result, String reason) {
+    public AccessLog(Long id, DigitalKey digitalKey, Guest guest, Instant accessTime, String result, String reason) {
         this.id = id;
         this.digitalKey = digitalKey;
         this.guest = guest;
