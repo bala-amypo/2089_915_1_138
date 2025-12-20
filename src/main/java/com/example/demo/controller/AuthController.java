@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -50,23 +49,25 @@ public class AuthController {
         return ResponseEntity.ok(createdGuest);
     }
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+    Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                    request.getEmail(),
+                    request.getPassword()
+            )
+    );
 
-        String token = jwtTokenProvider.generateToken(authentication);
+    String token = jwtTokenProvider.generateToken(authentication);
 
-        Optional<Guest> guest = guestService.getGuestByEmail(request.getEmail());
+    Guest guest = guestService.getGuestByEmail(request.getEmail())
+            .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("token", token);
-        response.put("guest", guest);
+    Map<String, Object> response = new HashMap<>();
+    response.put("token", token);
+    response.put("guest", guest);
 
-        return ResponseEntity.ok(response);
-    }
+    return ResponseEntity.ok(response);
+}
+
 }
