@@ -1,73 +1,41 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.LoginRequest;
+import com.example.demo.dto.ApiResponse;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.model.Guest;
-import com.example.demo.security.JwtTokenProvider;
 import com.example.demo.service.GuestService;
-
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
+@Tag(name = "Authentication", description = "Authentication operations")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+    private final GuestService guestService;
 
-    GuestService guestService;
-    AuthenticationManager authenticationManager;
-    JwtTokenProvider jwtTokenProvider;
-    PasswordEncoder passwordEncoder;
-
-    public AuthController(GuestService guestService,
-                          AuthenticationManager authenticationManager,
-                          JwtTokenProvider jwtTokenProvider,
-                          PasswordEncoder passwordEncoder) {
+    public AuthController(GuestService guestService) {
         this.guestService = guestService;
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Guest> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse> register(@RequestBody RegisterRequest registerRequest) {
+        try {
+            Guest guest = new Guest();
+            guest.setEmail(registerRequest.getEmail());
+            guest.setPassword(registerRequest.getPassword());
+            guest.setFullName(registerRequest.getFullName());
+            guest.setPhoneNumber(registerRequest.getPhoneNumber());
+            guest.setRole(registerRequest.getRole() != null ? registerRequest.getRole() : "ROLE_USER");
+            guest.setVerified(false);
+            guest.setActive(true);
 
-        Guest guest = new Guest();
-        guest.setFullName(request.getFullName());
-        guest.setEmail(request.getEmail());
-        guest.setPhoneNumber(request.getPhoneNumber());
-        guest.setPassword(request.getPassword());
-        guest.setRole(request.getRole());
-
-        Guest createdGuest = guestService.createGuest(guest);
-        return ResponseEntity.ok(createdGuest);
+            Guest createdGuest = guestService.createGuest(guest);
+            return ResponseEntity.ok(new ApiResponse(true, "Registration successful", createdGuest));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ApiResponse(false, "Registration failed"));
+        }
     }
-    @PostMapping("/login")
-public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-
-    Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                    request.getEmail(),
-                    request.getPassword()
-            )
-    );
-
-    String token = jwtTokenProvider.generateToken(authentication);
-
-    Guest guest = guestService.getGuestByEmail(request.getEmail())
-            .orElseThrow(() -> new RuntimeException("Invalid credentials"));
-
-    Map<String, Object> response = new HashMap<>();
-    response.put("token", token);
-    response.put("guest", guest);
-
-    return ResponseEntity.ok(response);
-}
-
 }

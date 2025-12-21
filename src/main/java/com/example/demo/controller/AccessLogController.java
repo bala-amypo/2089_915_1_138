@@ -1,36 +1,35 @@
 package com.example.demo.controller;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.example.demo.model.AccessLog;
 import com.example.demo.service.AccessLogService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import java.util.List;
 
+@Tag(name = "Access Logs", description = "Operations related to access logs")
 @RestController
 @RequestMapping("/api/access-logs")
 public class AccessLogController {
-    
-    AccessLogService accessLogService;
+    private final AccessLogService accessLogService;
+
+    public AccessLogController(AccessLogService accessLogService) {
+        this.accessLogService = accessLogService;
+    }
 
     @PostMapping
-    public AccessLog create(@RequestBody AccessLog log) {
-        return accessLogService.createLog(log);
+    public ResponseEntity<AccessLog> createLog(@RequestBody AccessLog log) {
+        return ResponseEntity.ok(accessLogService.createLog(log));
     }
 
     @GetMapping("/key/{keyId}")
-    public List<AccessLog> getForKey(@PathVariable Long keyId) {
-        return accessLogService.getLogsForKey(keyId);
+    public ResponseEntity<List<AccessLog>> getLogsForKey(@PathVariable Long keyId) {
+        return ResponseEntity.ok(accessLogService.getLogsForKey(keyId));
     }
 
     @GetMapping("/guest/{guestId}")
-    public List<AccessLog> getForGuest(@PathVariable Long guestId) {
-        return accessLogService.getLogsForGuest(guestId);
+    public ResponseEntity<List<AccessLog>> getLogsForGuest(@PathVariable Long guestId) {
+        return ResponseEntity.ok(accessLogService.getLogsForGuest(guestId));
     }
 }

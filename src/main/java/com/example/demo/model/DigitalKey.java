@@ -1,81 +1,65 @@
 package com.example.demo.model;
 
+import jakarta.persistence.*;
 import java.sql.Timestamp;
-import java.time.Instant;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "digital_keys")
+@Table(name = "digital_keys", uniqueConstraints = @UniqueConstraint(columnNames = "key_value"))
 public class DigitalKey {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "booking_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = false)
     private RoomBooking booking;
+
+    @Column(name = "key_value", nullable = false, unique = true)
     private String keyValue;
-    private Instant issuedAt;
-    private Instant expiresAt;
-    private boolean active;
 
-    
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public void setBooking(RoomBooking booking) {
-        this.booking = booking;
-    }
-    public void setKeyValue(String keyValue) {
-        this.keyValue = keyValue;
-    }
-    public void setIssuedAt(Instant issuedAt) {
-        this.issuedAt = issuedAt;
-    }
-    public void setExpiresAt(Instant expiresAt) {
-        this.expiresAt = expiresAt;
-    }
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-    public Long getId() {
-        return id;
-    }
-    public RoomBooking getBooking() {
-        return booking;
-    }
-    public String getKeyValue() {
-        return keyValue;
-    }
-    public Instant getIssuedAt() {
-        return issuedAt;
-    }
-    public Instant getExpiresAt() {
-        return expiresAt;
-    }
-    public boolean isActive() {
-        return active;
-    }
-    public DigitalKey(Long id, RoomBooking booking, String keyValue, Instant issuedAt, Instant expiresAt,
-            boolean active) {
-        this.id = id;
+    @Column(name = "issued_at", nullable = false)
+    private Timestamp issuedAt;
+
+    @Column(name = "expires_at", nullable = false)
+    private Timestamp expiresAt;
+
+    @Column(nullable = false)
+    private Boolean active = true;
+
+    public DigitalKey() {}
+
+    public DigitalKey(RoomBooking booking, String keyValue, Timestamp issuedAt, 
+                      Timestamp expiresAt, Boolean active) {
         this.booking = booking;
         this.keyValue = keyValue;
         this.issuedAt = issuedAt;
         this.expiresAt = expiresAt;
         this.active = active;
-    }
-    
-    public DigitalKey(RoomBooking booking2, String string, Timestamp issuedAt2, Timestamp expiresAt2, boolean b) {
+        validateTimestamps();
     }
 
-    public DigitalKey(){
+    public void validateTimestamps() {
+        if (expiresAt != null && issuedAt != null && expiresAt.before(issuedAt)) {
+            throw new IllegalArgumentException("Expires at must be after or equal to issued at");
+        }
     }
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public RoomBooking getBooking() { return booking; }
+    public void setBooking(RoomBooking booking) { this.booking = booking; }
+
+    public String getKeyValue() { return keyValue; }
+    public void setKeyValue(String keyValue) { this.keyValue = keyValue; }
+
+    public Timestamp getIssuedAt() { return issuedAt; }
+    public void setIssuedAt(Timestamp issuedAt) { this.issuedAt = issuedAt; }
+
+    public Timestamp getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(Timestamp expiresAt) { this.expiresAt = expiresAt; }
+
+    public Boolean getActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
 }

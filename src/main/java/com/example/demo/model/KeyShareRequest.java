@@ -1,15 +1,7 @@
 package com.example.demo.model;
 
-import java.time.Instant;
-
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "key_share_requests")
@@ -18,83 +10,79 @@ public class KeyShareRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "digital_key_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "digital_key_id", nullable = false)
     private DigitalKey digitalKey;
 
-    @ManyToOne
-    @JoinColumn(name = "shared_by_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shared_by_id", nullable = false)
     private Guest sharedBy;
 
-    @ManyToOne
-    @JoinColumn(name = "shared_with_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shared_with_id", nullable = false)
     private Guest sharedWith;
 
-    private Instant shareStart;
-    private Instant shareEnd;
-    private String status;
-    private Instant createdAt;
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public void setDigitalKey(DigitalKey digitalKey) {
-        this.digitalKey = digitalKey;
-    }
-    public void setSharedBy(Guest sharedBy) {
-        this.sharedBy = sharedBy;
-    }
-    public void setSharedWith(Guest sharedWith) {
-        this.sharedWith = sharedWith;
-    }
-    public void setShareStart(Instant shareStart) {
-        this.shareStart = shareStart;
-    }
-    public void setShareEnd(Instant shareEnd) {
-        this.shareEnd = shareEnd;
-    }
-    public void setStatus(String status) {
-        this.status = status;
-    }
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-    public Long getId() {
-        return id;
-    }
-    public DigitalKey getDigitalKey() {
-        return digitalKey;
-    }
-    public Guest getSharedBy() {
-        return sharedBy;
-    }
-    public Guest getSharedWith() {
-        return sharedWith;
-    }
-    public Instant getShareStart() {
-        return shareStart;
-    }
-    public Instant getShareEnd() {
-        return shareEnd;
-    }
-    public String getStatus() {
-        return status;
-    }
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-    public KeyShareRequest(Long id, DigitalKey digitalKey, Guest sharedBy, Guest sharedWith, Instant shareStart,
-            Instant shareEnd, String status, Instant createdAt) {
-        this.id = id;
-        this.digitalKey = digitalKey;
-        this.sharedBy = sharedBy;
-        this.sharedWith = sharedWith;
-        this.shareStart = shareStart;
-        this.shareEnd = shareEnd;
-        this.status = status;
-        this.createdAt = createdAt;
-    }
-    public KeyShareRequest() {
+    @Column(name = "share_start", nullable = false)
+    private Timestamp shareStart;
+
+    @Column(name = "share_end", nullable = false)
+    private Timestamp shareEnd;
+
+    @Column(nullable = false)
+    private String status = "PENDING";
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Timestamp createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = new Timestamp(System.currentTimeMillis());
     }
 
-    
+    public KeyShareRequest() {}
+
+    public KeyShareRequest(DigitalKey digitalKey, Guest sharedBy, Guest sharedWith, 
+                           Timestamp shareStart, Timestamp shareEnd, String status) {
+        this.digitalKey = digitalKey;
+        this.sharedBy = sharedBy;
+        this.sharedWith = sharedWith;
+        this.shareStart = shareStart;
+        this.shareEnd = shareEnd;
+        this.status = status;
+        validateShareRequest();
+    }
+
+    public void validateShareRequest() {
+        if (shareStart != null && shareEnd != null && !shareEnd.after(shareStart)) {
+            throw new IllegalArgumentException("Share end must be after share start");
+        }
+        if (sharedBy != null && sharedWith != null && sharedBy.getId().equals(sharedWith.getId())) {
+            throw new IllegalArgumentException("sharedBy and sharedWith cannot be the same");
+        }
+    }
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public DigitalKey getDigitalKey() { return digitalKey; }
+    public void setDigitalKey(DigitalKey digitalKey) { this.digitalKey = digitalKey; }
+
+    public Guest getSharedBy() { return sharedBy; }
+    public void setSharedBy(Guest sharedBy) { this.sharedBy = sharedBy; }
+
+    public Guest getSharedWith() { return sharedWith; }
+    public void setSharedWith(Guest sharedWith) { this.sharedWith = sharedWith; }
+
+    public Timestamp getShareStart() { return shareStart; }
+    public void setShareStart(Timestamp shareStart) { this.shareStart = shareStart; }
+
+    public Timestamp getShareEnd() { return shareEnd; }
+    public void setShareEnd(Timestamp shareEnd) { this.shareEnd = shareEnd; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public Timestamp getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 }

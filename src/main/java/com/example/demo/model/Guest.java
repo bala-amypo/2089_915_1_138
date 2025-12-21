@@ -1,87 +1,49 @@
 package com.example.demo.model;
 
-import java.time.Instant;
-
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
-@Table(name = "guests")
+@Table(name = "guests", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
 public class Guest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String fullName;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
     private String phoneNumber;
+
+    @Column(nullable = false)
     private String password;
-    private boolean verified = false;
-    private boolean active = true;
+
+    @Column(nullable = false)
+    private Boolean verified = false;
+
+    @Column(nullable = false)
+    private Boolean active = true;
+
+    @Column(nullable = false)
     private String role = "ROLE_USER";
-    private Instant createdAt;
-    public void setId(Long id) {
-        this.id = id;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Timestamp createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = new Timestamp(System.currentTimeMillis());
     }
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-    public void setPassword(String password) {
-        this.password = password;
-    }
-    public void setVerified(boolean verified) {
-        this.verified = verified;
-    }
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-    public void setRole(String role) {
-        this.role = role;
-    }
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-    public Long getId() {
-        return id;
-    }
-    public String getFullName() {
-        return fullName;
-    }
-    public String getEmail() {
-        return email;
-    }
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-    public String getPassword() {
-        return password;
-    }
-    public boolean isVerified() {
-        return verified;
-    }
-    public boolean getActive() {
-        return active;
-    }
-    public String getRole() {
-        return role;
-    }
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-    public Guest() {
-    }
-    public Guest(Long id, String fullName, String email, String phoneNumber, String password, boolean verified,
-            boolean active, String role, Instant createdAt) {
-        this.id = id;
+
+    // Constructors
+    public Guest() {}
+
+    public Guest(String fullName, String email, String phoneNumber, String password, 
+                 Boolean verified, Boolean active, String role, Timestamp createdAt) {
         this.fullName = fullName;
         this.email = email;
         this.phoneNumber = phoneNumber;
@@ -92,6 +54,31 @@ public class Guest {
         this.createdAt = createdAt;
     }
 
-    
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public Boolean getVerified() { return verified; }
+    public void setVerified(Boolean verified) { this.verified = verified; }
+
+    public Boolean getActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public Timestamp getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 }
