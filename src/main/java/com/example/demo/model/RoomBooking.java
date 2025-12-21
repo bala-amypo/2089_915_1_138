@@ -11,73 +11,57 @@ public class RoomBooking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guest_id", nullable = false)
+    
+    @ManyToOne
+    @JoinColumn(name = "guest_id")
     private Guest guest;
-
-    @Column(name = "room_number", nullable = false)
+    
     private String roomNumber;
-
-    @Column(name = "check_in_date", nullable = false)
     private LocalDate checkInDate;
-
-    @Column(name = "check_out_date", nullable = false)
     private LocalDate checkOutDate;
-
-    @Column(nullable = false)
     private Boolean active = true;
-
-    @ManyToMany(fetch = FetchType.LAZY)
+    
+    @ManyToMany
     @JoinTable(
         name = "booking_roommates",
         joinColumns = @JoinColumn(name = "booking_id"),
         inverseJoinColumns = @JoinColumn(name = "guest_id")
     )
     private Set<Guest> roommates = new HashSet<>();
-
+    
     public RoomBooking() {}
-
-    public RoomBooking(Guest guest, String roomNumber, LocalDate checkInDate, 
-                       LocalDate checkOutDate, Boolean active) {
+    
+    public RoomBooking(Guest guest, String roomNumber, LocalDate checkInDate, LocalDate checkOutDate, Boolean active) {
+        if (checkInDate != null && checkOutDate != null && !checkInDate.isBefore(checkOutDate)) {
+            throw new IllegalArgumentException("Check-in date must be before check-out date");
+        }
         this.guest = guest;
         this.roomNumber = roomNumber;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
-        this.active = active;
+        this.active = active != null ? active : true;
+        this.roommates = new HashSet<>();
     }
-
-    public void validateDates() {
-        if (checkInDate != null && checkOutDate != null && !checkInDate.isBefore(checkOutDate)) {
-            throw new IllegalArgumentException("Check-in date must be before check-out date");
-        }
-    }
-
+    
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
+    
     public Guest getGuest() { return guest; }
     public void setGuest(Guest guest) { this.guest = guest; }
-
+    
     public String getRoomNumber() { return roomNumber; }
     public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
-
+    
     public LocalDate getCheckInDate() { return checkInDate; }
-    public void setCheckInDate(LocalDate checkInDate) { 
-        this.checkInDate = checkInDate;
-        validateDates();
-    }
-
+    public void setCheckInDate(LocalDate checkInDate) { this.checkInDate = checkInDate; }
+    
     public LocalDate getCheckOutDate() { return checkOutDate; }
-    public void setCheckOutDate(LocalDate checkOutDate) { 
-        this.checkOutDate = checkOutDate;
-        validateDates();
-    }
-
+    public void setCheckOutDate(LocalDate checkOutDate) { this.checkOutDate = checkOutDate; }
+    
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
-
+    
     public Set<Guest> getRoommates() { return roommates; }
     public void setRoommates(Set<Guest> roommates) { this.roommates = roommates; }
 }
