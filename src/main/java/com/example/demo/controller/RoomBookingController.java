@@ -2,56 +2,49 @@ package com.example.demo.controller;
 
 import com.example.demo.model.RoomBooking;
 import com.example.demo.service.RoomBookingService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Room Bookings", description = "Operations related to room bookings")
 @RestController
 @RequestMapping("/api/bookings")
-@Tag(name = "Room Bookings")
 public class RoomBookingController {
-    
     private final RoomBookingService roomBookingService;
-    
+
     public RoomBookingController(RoomBookingService roomBookingService) {
         this.roomBookingService = roomBookingService;
     }
-    
+
     @PostMapping
-    @Operation(summary = "Create a new room booking")
     public ResponseEntity<RoomBooking> createBooking(@RequestBody RoomBooking booking) {
-        RoomBooking createdBooking = roomBookingService.createBooking(booking);
-        return ResponseEntity.ok(createdBooking);
+        return ResponseEntity.ok(roomBookingService.createBooking(booking));
     }
-    
+
     @GetMapping("/{id}")
-    @Operation(summary = "Get booking by ID")
-    public ResponseEntity<RoomBooking> getBookingById(@Parameter(name = "id", description = "Booking ID") @PathVariable Long id) {
-        RoomBooking booking = roomBookingService.getBookingById(id);
-        return ResponseEntity.ok(booking);
+    public ResponseEntity<RoomBooking> getBookingById(@PathVariable Long id) {
+        try {
+            RoomBooking booking = roomBookingService.getBookingById(id);
+            return ResponseEntity.ok(booking);
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching booking: " + e.getMessage());
+        }
     }
-    
+
     @GetMapping("/guest/{guestId}")
-    @Operation(summary = "Get bookings for guest")
-    public ResponseEntity<List<RoomBooking>> getBookingsForGuest(@Parameter(name = "guestId", description = "Guest ID") @PathVariable Long guestId) {
-        List<RoomBooking> bookings = roomBookingService.getBookingsForGuest(guestId);
-        return ResponseEntity.ok(bookings);
+    public ResponseEntity<List<RoomBooking>> getBookingsForGuest(@PathVariable Long guestId) {
+        return ResponseEntity.ok(roomBookingService.getBookingsForGuest(guestId));
     }
-    
+
     @PutMapping("/{id}")
-    @Operation(summary = "Update booking")
-    public ResponseEntity<RoomBooking> updateBooking(@Parameter(name = "id", description = "Booking ID") @PathVariable Long id, @RequestBody RoomBooking booking) {
-        RoomBooking updatedBooking = roomBookingService.updateBooking(id, booking);
-        return ResponseEntity.ok(updatedBooking);
+    public ResponseEntity<RoomBooking> updateBooking(@PathVariable Long id, @RequestBody RoomBooking booking) {
+        return ResponseEntity.ok(roomBookingService.updateBooking(id, booking));
     }
-    
+
     @PutMapping("/{id}/deactivate")
-    @Operation(summary = "Deactivate booking")
-    public ResponseEntity<Void> deactivateBooking(@Parameter(name = "id", description = "Booking ID") @PathVariable Long id) {
+    public ResponseEntity<Void> deactivateBooking(@PathVariable Long id) {
         roomBookingService.deactivateBooking(id);
         return ResponseEntity.ok().build();
     }

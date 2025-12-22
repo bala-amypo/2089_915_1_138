@@ -2,56 +2,44 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Guest;
 import com.example.demo.service.GuestService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Guest Management", description = "Operations related to guest management")
 @RestController
 @RequestMapping("/api/guests")
-@Tag(name = "Guest Management")
 public class GuestController {
-    
     private final GuestService guestService;
-    
+
     public GuestController(GuestService guestService) {
         this.guestService = guestService;
     }
-    
+
     @PostMapping
-    @Operation(summary = "Create a new guest")
     public ResponseEntity<Guest> createGuest(@RequestBody Guest guest) {
-        Guest createdGuest = guestService.createGuest(guest);
-        return ResponseEntity.ok(createdGuest);
+        return ResponseEntity.ok(guestService.createGuest(guest));
     }
-    
+
     @GetMapping("/{id}")
-    @Operation(summary = "Get guest by ID")
-    public ResponseEntity<Guest> getGuestById(@Parameter(name = "id", description = "Guest ID") @PathVariable Long id) {
-        Guest guest = guestService.getGuestById(id);
-        return ResponseEntity.ok(guest);
+    public ResponseEntity<Guest> getGuestById(@PathVariable Long id) {
+        return ResponseEntity.ok(guestService.getGuestById(id));
     }
-    
+
     @GetMapping
-    @Operation(summary = "Get all guests")
     public ResponseEntity<List<Guest>> getAllGuests() {
-        List<Guest> guests = guestService.getAllGuests();
-        return ResponseEntity.ok(guests);
+        return ResponseEntity.ok(guestService.getAllGuests());
     }
-    
+
     @PutMapping("/{id}")
-    @Operation(summary = "Update guest")
-    public ResponseEntity<Guest> updateGuest(@Parameter(name = "id", description = "Guest ID") @PathVariable Long id, @RequestBody Guest guest) {
-        Guest updatedGuest = guestService.updateGuest(id, guest);
-        return ResponseEntity.ok(updatedGuest);
+    public ResponseEntity<Guest> updateGuest(@PathVariable Long id, @RequestBody Guest guest) {
+        return ResponseEntity.ok(guestService.updateGuest(id, guest));
     }
-    
+
     @PutMapping("/{id}/deactivate")
-    @Operation(summary = "Deactivate guest")
-    public ResponseEntity<Void> deactivateGuest(@Parameter(name = "id", description = "Guest ID") @PathVariable Long id) {
+    public ResponseEntity<Void> deactivateGuest(@PathVariable Long id) {
         guestService.deactivateGuest(id);
         return ResponseEntity.ok().build();
     }
