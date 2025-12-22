@@ -1,22 +1,19 @@
 package com.example.demo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
 @Table(name = "access_logs")
 public class AccessLog {
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "digital_key_id", nullable = false)
     private DigitalKey digitalKey;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "guest_id", nullable = false)
     private Guest guest;
@@ -32,7 +29,7 @@ public class AccessLog {
 
     public AccessLog() {}
 
-    public AccessLog(DigitalKey digitalKey, Guest guest, Timestamp accessTime, 
+    public AccessLog(DigitalKey digitalKey, Guest guest, Timestamp accessTime,
                      String result, String reason) {
         this.digitalKey = digitalKey;
         this.guest = guest;
@@ -48,7 +45,6 @@ public class AccessLog {
         }
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

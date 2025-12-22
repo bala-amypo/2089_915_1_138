@@ -1,6 +1,5 @@
 package com.example.demo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.sql.Timestamp;
 
@@ -11,17 +10,14 @@ public class KeyShareRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "digital_key_id", nullable = false)
     private DigitalKey digitalKey;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shared_by_id", nullable = false)
     private Guest sharedBy;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shared_with_id", nullable = false)
     private Guest sharedWith;
@@ -60,12 +56,8 @@ public class KeyShareRequest {
         if (shareStart != null && shareEnd != null && !shareEnd.after(shareStart)) {
             throw new IllegalArgumentException("Share end must be after share start");
         }
-        if (sharedBy != null && sharedWith != null && sharedBy.getId().equals(sharedWith.getId())) {
-            throw new IllegalArgumentException("sharedBy and sharedWith cannot be the same");
-        }
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
