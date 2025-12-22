@@ -14,46 +14,44 @@ import java.util.UUID;
 
 @Service
 public class DigitalKeyServiceImpl implements DigitalKeyService {
-    
     private final DigitalKeyRepository digitalKeyRepository;
     private final RoomBookingRepository roomBookingRepository;
-    
-    public DigitalKeyServiceImpl(DigitalKeyRepository digitalKeyRepository, RoomBookingRepository roomBookingRepository) {
+
+    public DigitalKeyServiceImpl(DigitalKeyRepository digitalKeyRepository, 
+                                 RoomBookingRepository roomBookingRepository) {
         this.digitalKeyRepository = digitalKeyRepository;
         this.roomBookingRepository = roomBookingRepository;
     }
-    
+
     @Override
     public DigitalKey generateKey(Long bookingId) {
         RoomBooking booking = roomBookingRepository.findById(bookingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
         
         if (!booking.getActive()) {
-            throw new IllegalStateException("Cannot generate key for inactive booking");
+            throw new IllegalStateException("Booking is inactive");
         }
-        
-        DigitalKey digitalKey = new DigitalKey();
-        digitalKey.setBooking(booking);
-        digitalKey.setKeyValue(UUID.randomUUID().toString());
-        digitalKey.setIssuedAt(new Timestamp(System.currentTimeMillis()));
-        digitalKey.setExpiresAt(new Timestamp(System.currentTimeMillis() + 24 * 60 * 60 * 1000)); // 24 hours
-        digitalKey.setActive(true);
-        
+
+        String keyValue = UUID.randomUUID().toString();
+        Timestamp issuedAt = new Timestamp(System.currentTimeMillis());
+        Timestamp expiresAt = new Timestamp(issuedAt.getTime() + (24 * 60 * 60 * 1000));
+
+        DigitalKey digitalKey = new DigitalKey(booking, keyValue, issuedAt, expiresAt, true);
         return digitalKeyRepository.save(digitalKey);
     }
-    
+
     @Override
     public DigitalKey getKeyById(Long id) {
         return digitalKeyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Key not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Digital key not found with id: " + id));
     }
-    
+
     @Override
     public DigitalKey getActiveKeyForBooking(Long bookingId) {
         return digitalKeyRepository.findByBookingIdAndActiveTrue(bookingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Key not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Active digital key not found for booking: " + bookingId));
     }
-    
+
     @Override
     public List<DigitalKey> getKeysForGuest(Long guestId) {
         return digitalKeyRepository.findByBookingGuestId(guestId);

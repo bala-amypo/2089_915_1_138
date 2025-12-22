@@ -9,5 +9,4 @@ public interface GuestService {
     Guest getGuestById(Long id);
     List<Guest> getAllGuests();
     void deactivateGuest(Long id);
-    Guest getGuestByEmail(String email);
 }
