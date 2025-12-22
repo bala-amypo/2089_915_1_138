@@ -28,7 +28,15 @@ public class KeyShareRequestServiceImpl implements KeyShareRequestService {
 
     @Override
     public KeyShareRequest createShareRequest(KeyShareRequest request) {
-        request.validateShareRequest();
+        if (request.getDigitalKey() == null || request.getDigitalKey().getId() == null) {
+            throw new IllegalArgumentException("Digital key ID must be specified");
+        }
+        if (request.getSharedBy() == null || request.getSharedBy().getId() == null) {
+            throw new IllegalArgumentException("Shared by guest ID must be specified");
+        }
+        if (request.getSharedWith() == null || request.getSharedWith().getId() == null) {
+            throw new IllegalArgumentException("Shared with guest ID must be specified");
+        }
 
         DigitalKey digitalKey = digitalKeyRepository.findById(request.getDigitalKey().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Digital key not found"));
@@ -40,6 +48,14 @@ public class KeyShareRequestServiceImpl implements KeyShareRequestService {
                 .orElseThrow(() -> new ResourceNotFoundException("Shared by guest not found"));
         Guest sharedWith = guestRepository.findById(request.getSharedWith().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Shared with guest not found"));
+
+        if (sharedBy.getId().equals(sharedWith.getId())) {
+            throw new IllegalArgumentException("sharedBy and sharedWith cannot be the same");
+        }
+
+        if (request.getShareStart() != null && request.getShareEnd() != null && !request.getShareEnd().after(request.getShareStart())) {
+            throw new IllegalArgumentException("Share end must be after share start");
+        }
 
         request.setDigitalKey(digitalKey);
         request.setSharedBy(sharedBy);
@@ -58,7 +74,7 @@ public class KeyShareRequestServiceImpl implements KeyShareRequestService {
 
     @Override
     public KeyShareRequest getShareRequestById(Long id) {
-        return keyShareRequestRepository.findById(id)
+        return keyShareRequestRepository.findByIdWithAssociations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Key share request not found with id: " + id));
     }
 
