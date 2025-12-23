@@ -30,7 +30,7 @@ public class RoomBooking {
     private Boolean active = true;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
     @JoinTable(
         name = "booking_roommates",
         joinColumns = @JoinColumn(name = "booking_id"),

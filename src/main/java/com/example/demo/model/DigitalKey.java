@@ -12,7 +12,7 @@ public class DigitalKey {
     private Long id;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "booking_id", nullable = false)
     private RoomBooking booking;
 
