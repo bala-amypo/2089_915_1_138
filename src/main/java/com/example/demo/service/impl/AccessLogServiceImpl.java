@@ -14,19 +14,21 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AccessLogServiceImpl implements AccessLogService {
+
     private final AccessLogRepository accessLogRepository;
     private final DigitalKeyRepository digitalKeyRepository;
     private final GuestRepository guestRepository;
     private final KeyShareRequestRepository keyShareRequestRepository;
 
-    public AccessLogServiceImpl(AccessLogRepository accessLogRepository,
-                                DigitalKeyRepository digitalKeyRepository,
-                                GuestRepository guestRepository,
-                                KeyShareRequestRepository keyShareRequestRepository) {
+    public AccessLogServiceImpl(
+            AccessLogRepository accessLogRepository,
+            DigitalKeyRepository digitalKeyRepository,
+            GuestRepository guestRepository,
+            KeyShareRequestRepository keyShareRequestRepository
+    ) {
         this.accessLogRepository = accessLogRepository;
         this.digitalKeyRepository = digitalKeyRepository;
         this.guestRepository = guestRepository;
@@ -35,53 +37,64 @@ public class AccessLogServiceImpl implements AccessLogService {
 
     @Override
     public AccessLog createLog(AccessLog log) {
-        log.validateAccessTime();
 
-        DigitalKey digitalKey = digitalKeyRepository.findById(log.getDigitalKey().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Digital key not found"));
-        if (!digitalKey.getActive()) {
-            log.setResult("DENIED");
-            log.setReason("Digital key is not active");
-            return accessLogRepository.save(log);
+        // Validate future access time
+        if (log.getAccessTime().after(new Timestamp(System.currentTimeMillis()))) {
+            throw new IllegalArgumentException("future");
         }
 
+        // Fetch digital key
+        DigitalKey key = digitalKeyRepository.findById(log.getDigitalKey().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Key not found"));
+
+        // Fetch guest
         Guest guest = guestRepository.findById(log.getGuest().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
-        if (!guest.getActive()) {
-            log.setResult("DENIED");
-            log.setReason("Guest account is not active");
-            return accessLogRepository.save(log);
+
+        boolean allowed = false;
+
+        // Case 1: Booking owner
+        if (key.getBooking().getGuest().getId().equals(guest.getId())) {
+            allowed = true;
         }
 
-        boolean hasValidAccess = false;
-        String reason = "";
+        // Case 2: Shared access
+        if (!allowed) {
+            List<KeyShareRequest> shares =
+                    keyShareRequestRepository.findBySharedWithId(guest.getId());
 
-        if (digitalKey.getBooking().getGuest().getId().equals(guest.getId())) {
-            hasValidAccess = true;
-            reason = "Guest is the booking owner";
-        } else {
-            Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-            List<KeyShareRequest> approvedRequests = keyShareRequestRepository.findBySharedWithId(guest.getId()).stream()
-                    .filter(req -> req.getDigitalKey().getId().equals(digitalKey.getId()))
-                    .filter(req -> req.getStatus().equals("APPROVED"))
-                    .filter(req -> req.getShareStart().before(currentTime) && req.getShareEnd().after(currentTime))
-                    .collect(Collectors.toList());
-
-            if (!approvedRequests.isEmpty()) {
-                hasValidAccess = true;
-                reason = "Guest has approved key share request";
+            for (KeyShareRequest req : shares) {
+                if (req.getDigitalKey().getId().equals(key.getId())
+                        && "APPROVED".equals(req.getStatus())
+                        && log.getAccessTime().after(req.getShareStart())
+                        && log.getAccessTime().before(req.getShareEnd())) {
+                    allowed = true;
+                    break;
+                }
             }
         }
 
-        if (hasValidAccess) {
-            log.setResult("SUCCESS");
-            log.setReason(reason);
+        AccessLog resultLog;
+
+        if (allowed) {
+            resultLog = new AccessLog(
+                    key,
+                    guest,
+                    log.getAccessTime(),
+                    "SUCCESS",
+                    "Access granted"
+            );
         } else {
-            log.setResult("DENIED");
-            log.setReason("Guest does not have valid access to this digital key");
+            resultLog = new AccessLog(
+                    key,
+                    guest,
+                    log.getAccessTime(),
+                    "DENIED",
+                    "Access denied"
+            );
         }
 
-        return accessLogRepository.save(log);
+        return accessLogRepository.save(resultLog);
     }
 
     @Override
