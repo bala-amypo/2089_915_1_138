@@ -1,42 +1,51 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.ApiResponse;
-import com.example.demo.dto.RegisterRequest;
 import com.example.demo.model.Guest;
 import com.example.demo.service.GuestService;
+import com.example.demo.security.JwtTokenProvider;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Authentication", description = "Authentication operations")
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Authentication", description = "APIs for user authentication")
 public class AuthController {
-    private final GuestService guestService;
 
-    public AuthController(GuestService guestService) {
-        this.guestService = guestService;
-    }
+    @Autowired
+    private GuestService guestService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        try {
-            Guest guest = new Guest();
-            guest.setEmail(registerRequest.getEmail());
-            guest.setPassword(registerRequest.getPassword());
-            guest.setFullName(registerRequest.getFullName());
-            guest.setPhoneNumber(registerRequest.getPhoneNumber());
-            guest.setRole(registerRequest.getRole() != null ? registerRequest.getRole() : "ROLE_USER");
-            guest.setVerified(false);
-            guest.setActive(true);
+    @Operation(summary = "Register a new user")
+    public ResponseEntity<Guest> register(@RequestBody Guest guest) {
+        Guest created = guestService.createGuest(guest);
+        return ResponseEntity.ok(created);
+    }
 
-            Guest createdGuest = guestService.createGuest(guest);
-            return ResponseEntity.ok(new ApiResponse(true, "Registration successful", createdGuest));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(new ApiResponse(false, "Registration failed"));
-        }
+    @PostMapping("/login")
+    @Operation(summary = "Login user and get JWT token")
+    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> loginRequest) {
+        String email = loginRequest.get("email");
+        String password = loginRequest.get("password");
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password));
+
+        String token = jwtTokenProvider.generateToken(authentication);
+        
+        return ResponseEntity.ok(Map.of("token", token, "email", email));
     }
 }
