@@ -1,6 +1,5 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.AccessLog;
 import com.example.demo.model.DigitalKey;
 import com.example.demo.model.Guest;
@@ -11,86 +10,95 @@ import com.example.demo.repository.GuestRepository;
 import com.example.demo.repository.KeyShareRequestRepository;
 import com.example.demo.service.AccessLogService;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class AccessLogServiceImpl implements AccessLogService {
+    
     private final AccessLogRepository accessLogRepository;
     private final DigitalKeyRepository digitalKeyRepository;
     private final GuestRepository guestRepository;
     private final KeyShareRequestRepository keyShareRequestRepository;
-
-    public AccessLogServiceImpl(AccessLogRepository accessLogRepository,
-                                DigitalKeyRepository digitalKeyRepository,
-                                GuestRepository guestRepository,
-                                KeyShareRequestRepository keyShareRequestRepository) {
+    
+    public AccessLogServiceImpl(AccessLogRepository accessLogRepository, DigitalKeyRepository digitalKeyRepository, 
+                               GuestRepository guestRepository, KeyShareRequestRepository keyShareRequestRepository) {
         this.accessLogRepository = accessLogRepository;
         this.digitalKeyRepository = digitalKeyRepository;
         this.guestRepository = guestRepository;
         this.keyShareRequestRepository = keyShareRequestRepository;
     }
-
+    
     @Override
     public AccessLog createLog(AccessLog log) {
-        log.validateAccessTime();
-
-        DigitalKey digitalKey = digitalKeyRepository.findById(log.getDigitalKey().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Digital key not found"));
-        if (!digitalKey.getActive()) {
-            log.setResult("DENIED");
-            log.setReason("Digital key is not active");
-            return accessLogRepository.save(log);
+        // Check if access time is in the future
+        if (log.getAccessTime() != null && log.getAccessTime().toInstant().isAfter(Instant.now())) {
+            throw new IllegalArgumentException("Access time cannot be in the future");
         }
-
-        Guest guest = guestRepository.findById(log.getGuest().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
-        if (!guest.getActive()) {
-            log.setResult("DENIED");
-            log.setReason("Guest account is not active");
-            return accessLogRepository.save(log);
-        }
-
-        boolean hasValidAccess = false;
-        String reason = "";
-
-        if (digitalKey.getBooking().getGuest().getId().equals(guest.getId())) {
-            hasValidAccess = true;
-            reason = "Guest is the booking owner";
-        } else {
-            Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-            List<KeyShareRequest> approvedRequests = keyShareRequestRepository.findBySharedWithId(guest.getId()).stream()
-                    .filter(req -> req.getDigitalKey().getId().equals(digitalKey.getId()))
-                    .filter(req -> req.getStatus().equals("APPROVED"))
-                    .filter(req -> req.getShareStart().before(currentTime) && req.getShareEnd().after(currentTime))
-                    .collect(Collectors.toList());
-
-            if (!approvedRequests.isEmpty()) {
-                hasValidAccess = true;
-                reason = "Guest has approved key share request";
+        
+        DigitalKey key = log.getDigitalKey();
+        Guest guest = log.getGuest();
+        
+        // Determine access result
+        String result = "DENIED";
+        String reason = "Unknown";
+        
+        if (key != null && key.getActive()) {
+            // Check if key is expired
+            if (key.getExpiresAt() != null && key.getExpiresAt().isBefore(Instant.now())) {
+                reason = "Key expired";
             }
-        }
-
-        if (hasValidAccess) {
-            log.setResult("SUCCESS");
-            log.setReason(reason);
+            // Check if key is not yet valid
+            else if (key.getIssuedAt() != null && key.getIssuedAt().isAfter(Instant.now())) {
+                reason = "Key not yet valid";
+            }
+            // Check if guest is the booking owner
+            else if (key.getBooking() != null && key.getBooking().getGuest() != null && 
+                     key.getBooking().getGuest().getId().equals(guest.getId())) {
+                result = "SUCCESS";
+                reason = "Booking owner";
+            }
+            // Check if guest has shared access
+            else {
+                List<KeyShareRequest> shareRequests = keyShareRequestRepository.findBySharedWithId(guest.getId());
+                boolean hasValidShare = shareRequests.stream()
+                    .anyMatch(req -> req.getDigitalKey().getId().equals(key.getId()) && 
+                                   "APPROVED".equals(req.getStatus()) &&
+                                   req.getShareStart().toInstant().isBefore(Instant.now()) &&
+                                   req.getShareEnd().toInstant().isAfter(Instant.now()));
+                
+                if (hasValidShare) {
+                    result = "SUCCESS";
+                    reason = "Shared access";
+                } else {
+                    reason = "No valid access";
+                }
+            }
         } else {
-            log.setResult("DENIED");
-            log.setReason("Guest does not have valid access to this digital key");
+            reason = "Inactive key";
         }
-
+        
+        log.setResult(result);
+        log.setReason(reason);
+        
         return accessLogRepository.save(log);
     }
-
+    
+    @Override
+    public List<AccessLog> getLogsForGuest(Long guestId) {
+        return accessLogRepository.findByGuestId(guestId);
+    }
+    
     @Override
     public List<AccessLog> getLogsForKey(Long keyId) {
         return accessLogRepository.findByDigitalKeyId(keyId);
     }
-
+    
     @Override
-    public List<AccessLog> getLogsForGuest(Long guestId) {
-        return accessLogRepository.findByGuestId(guestId);
+    public List<AccessLog> getLogsBetween(Instant start, Instant end) {
+        return accessLogRepository.findByAccessTimeBetween(start, end);
     }
 }
