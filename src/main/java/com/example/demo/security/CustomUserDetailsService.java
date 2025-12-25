@@ -1,0 +1,34 @@
+package com.example.demo.security;
+
+import com.example.demo.model.Guest;
+import com.example.demo.repository.GuestRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+    
+    @Autowired
+    private GuestRepository guestRepository;
+    
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Guest guest = guestRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        
+        String role = guest.getRole();
+        if (role == null || !role.startsWith("ROLE_")) {
+            role = "ROLE_" + (role != null ? role : "USER");
+        }
+        
+        return new CustomUserDetails(
+                guest.getId(),
+                guest.getEmail(),
+                guest.getPassword(),
+                role
+        );
+    }
+}
