@@ -2,6 +2,7 @@ package com.example.demo.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -11,8 +12,15 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
     
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final long validityInMilliseconds = 3600000; // 1h
+    @Value("${app.jwt.secret:mySecretKeyForJWTTokenGeneration}")
+    private String jwtSecret;
+    
+    @Value("${app.jwt.validity-ms:86400000}")
+    private long validityInMilliseconds;
+    
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    }
     
     public String createToken(String email, String role, Long userId) {
         Claims claims = Jwts.claims().setSubject(email);
@@ -26,26 +34,21 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .signWith(key)
+                .signWith(getSigningKey())
                 .compact();
     }
     
     public String generateToken(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        GuestPrincipal guestPrincipal = (GuestPrincipal) authentication.getPrincipal();
+        String role = guestPrincipal.getAuthorities().iterator().next().getAuthority();
+        Long userId = guestPrincipal.getId();
         
-        // Extract user ID from UserDetails if it's a CustomUserDetails
-        Long userId = 300L; // default
-        if (userDetails instanceof CustomUserDetails) {
-            userId = ((CustomUserDetails) userDetails).getId();
-        }
-        
-        return createToken(userDetails.getUsername(), role, userId);
+        return createToken(guestPrincipal.getUsername(), role, userId);
     }
     
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
@@ -53,7 +56,7 @@ public class JwtTokenProvider {
     }
     
     public String getEmail(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build()
+        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
                 .parseClaimsJws(token).getBody().getSubject();
     }
     
@@ -62,7 +65,7 @@ public class JwtTokenProvider {
     }
     
     public String getRole(String token) {
-        return (String) Jwts.parserBuilder().setSigningKey(key).build()
+        return (String) Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
                 .parseClaimsJws(token).getBody().get("role");
     }
     
@@ -71,7 +74,7 @@ public class JwtTokenProvider {
     }
     
     public Long getUserId(String token) {
-        return ((Number) Jwts.parserBuilder().setSigningKey(key).build()
+        return ((Number) Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
                 .parseClaimsJws(token).getBody().get("userId")).longValue();
     }
     

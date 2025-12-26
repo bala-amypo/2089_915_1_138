@@ -19,16 +19,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         Guest guest = guestRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
         
-        String role = guest.getRole();
-        if (role == null || !role.startsWith("ROLE_")) {
-            role = "ROLE_" + (role != null ? role : "USER");
-        }
-        
-        return new CustomUserDetails(
-                guest.getId(),
-                guest.getEmail(),
-                guest.getPassword(),
-                role
-        );
+        return new GuestPrincipal(guest);
     }
 }
