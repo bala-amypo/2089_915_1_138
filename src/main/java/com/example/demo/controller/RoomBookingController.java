@@ -3,9 +3,11 @@ package com.example.demo.controller;
 import com.example.demo.model.RoomBooking;
 import com.example.demo.service.RoomBookingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/bookings")
 @Tag(name = "Room Booking Management", description = "APIs for managing room bookings")
+@SecurityRequirement(name = "bearerAuth")
 public class RoomBookingController {
 
     @Autowired
@@ -20,6 +23,7 @@ public class RoomBookingController {
 
     @PostMapping("/")
     @Operation(summary = "Create a new room booking")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoomBooking> createBooking(@RequestBody RoomBooking booking) {
         RoomBooking created = roomBookingService.createBooking(booking);
         return ResponseEntity.ok(created);
@@ -27,6 +31,7 @@ public class RoomBookingController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update room booking")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoomBooking> updateBooking(@PathVariable Long id, @RequestBody RoomBooking booking) {
         RoomBooking updated = roomBookingService.updateBooking(id, booking);
         return ResponseEntity.ok(updated);
@@ -35,8 +40,8 @@ public class RoomBookingController {
     @GetMapping("/{id}")
     @Operation(summary = "Get booking by ID")
     public ResponseEntity<RoomBooking> getBooking(@PathVariable Long id) {
-        // Need to add this method to service
-        return ResponseEntity.ok(new RoomBooking());
+        RoomBooking booking = roomBookingService.getBookingById(id);
+        return ResponseEntity.ok(booking);
     }
 
     @GetMapping("/guest/{guestId}")
@@ -48,8 +53,9 @@ public class RoomBookingController {
 
     @PutMapping("/{id}/deactivate")
     @Operation(summary = "Deactivate a booking")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deactivateBooking(@PathVariable Long id) {
-        // Need to add this method to service
+        roomBookingService.deactivateBooking(id);
         return ResponseEntity.ok().build();
     }
 }

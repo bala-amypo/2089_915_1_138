@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.KeyShareRequest;
 import com.example.demo.service.KeyShareRequestService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/key-share")
 @Tag(name = "Key Share Management", description = "APIs for managing key sharing requests")
+@SecurityRequirement(name = "bearerAuth")
 public class KeyShareRequestController {
 
     @Autowired
@@ -28,15 +30,15 @@ public class KeyShareRequestController {
     @PutMapping("/{id}/status")
     @Operation(summary = "Update share request status")
     public ResponseEntity<KeyShareRequest> updateStatus(@PathVariable Long id, @RequestParam String status) {
-        // Need to add this method to service
-        return ResponseEntity.ok(new KeyShareRequest());
+        KeyShareRequest updated = keyShareRequestService.updateStatus(id, status);
+        return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get share request by ID")
     public ResponseEntity<KeyShareRequest> getShareRequest(@PathVariable Long id) {
-        // Need to add this method to service
-        return ResponseEntity.ok(new KeyShareRequest());
+        KeyShareRequest request = keyShareRequestService.getShareRequestById(id);
+        return ResponseEntity.ok(request);
     }
 
     @GetMapping("/shared-by/{guestId}")

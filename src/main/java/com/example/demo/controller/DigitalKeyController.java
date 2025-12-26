@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.DigitalKey;
 import com.example.demo.service.DigitalKeyService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/digital-keys")
 @Tag(name = "Digital Key Management", description = "APIs for managing digital keys")
+@SecurityRequirement(name = "bearerAuth")
 public class DigitalKeyController {
 
     @Autowired
@@ -28,8 +30,8 @@ public class DigitalKeyController {
     @GetMapping("/{id}")
     @Operation(summary = "Get digital key by ID")
     public ResponseEntity<DigitalKey> getKey(@PathVariable Long id) {
-        // Need to add this method to service
-        return ResponseEntity.ok(new DigitalKey());
+        DigitalKey key = digitalKeyService.getKeyById(id);
+        return ResponseEntity.ok(key);
     }
 
     @GetMapping("/booking/{bookingId}")
