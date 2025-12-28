@@ -19,7 +19,7 @@ public class OpenApiConfig {
 
         // Production Server
         Server productionServer = new Server()
-                .url("https://9103.408procr.amypo.ai/")
+                .url("https://9168.408procr.amypo.ai/")
                 .description("Production Server");
 
         // JWT Security Scheme
